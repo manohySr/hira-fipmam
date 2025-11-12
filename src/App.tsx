@@ -14,7 +14,6 @@ function App() {
     <div className="p-5">
       <Logo />
 
-      {/* search */}
       <div className="relative w-full mt-2 mb-2">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -25,7 +24,7 @@ function App() {
         />
       </div>
 
-      <Song author="Tahiana Andry Nandrasana" title="Ry voronkely soa" id={1} />
+      <Song author="Linkin Park" title="In the end" id={1} />
     </div>
   );
 }
