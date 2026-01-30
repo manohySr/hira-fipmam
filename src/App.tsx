@@ -1,15 +1,52 @@
-import { useState, type ChangeEvent } from "react";
-import "./App.css";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Input } from "./components/ui/input";
-import { Search } from "lucide-react";
-import Logo from "./components/Logo.tsx";
-import Song from "./components/Song.tsx";
+import { Search, Loader2 } from "lucide-react";
+import Logo from "./components/Logo";
+import Song from "./components/Song";
+import { getSongs, searchSongs } from "./services/songs.service.ts";
+import type { Song as SongType } from "./types/songs.ts";
+import { Button } from "./components/ui/button.tsx";
 
 function App() {
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const [songs, setSongs] = useState<SongType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
   }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const res =
+          search.trim().length > 0
+            ? await searchSongs(search, signal, page)
+            : await getSongs(signal, page);
+
+        setSongs(res.data);
+        setTotalPages(res.totalPages);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [search, page]);
+
   return (
     <div className="p-5">
       <Logo />
@@ -24,7 +61,44 @@ function App() {
         />
       </div>
 
-      <Song author="Linkin Park" title="In the end" id={1} />
+      {loading && (
+        <div className="flex justify-center items-center mt-4">
+          <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
+        </div>
+      )}
+
+      {songs.map((song) => (
+        <Song
+          key={song.id}
+          id={song.id}
+          title={song.title}
+          author={song.artist}
+        />
+      ))}
+
+      {songs.length > 0 && (
+        <div className="mt-4 flex justify-center space-x-2">
+          <Button
+            onClick={() => setPage(page - 1)}
+            disabled={page <= 1}
+            className={page <= 1 ? "" : "text-blue-500"}
+          >
+            Teo aloha
+          </Button>
+
+          <span className="flex items-center text-sm">
+            Page {page} / {totalPages}
+          </span>
+
+          <Button
+            onClick={() => setPage(page + 1)}
+            disabled={page >= totalPages}
+            className={page >= totalPages ? "" : "text-blue-500"}
+          >
+            Manaraka
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

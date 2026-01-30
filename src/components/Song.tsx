@@ -4,7 +4,7 @@ import { NavLink } from "react-router";
 interface SongProps {
   title: string;
   author: string;
-  id: number;
+  id: string;
 }
 export default function Song({ title, author, id }: SongProps) {
   return (
